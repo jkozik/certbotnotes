@@ -121,25 +121,6 @@ This prompting of a TXT string and editting it into the DNS record can be done m
 
 ## Renewing kozik.net 
 ```
-[root@dell1 certbot]# certbot certonly --dns-cloudflare --dns-cloudflare-credentials ~/.secrets/certbot/cloudflare.ini -d "*.kozik.net" -d "kozik.net" --dry-run
-Saving debug log to /var/log/letsencrypt/letsencrypt.log
-Plugins selected: Authenticator dns-cloudflare, Installer None
-Starting new HTTPS connection (1): acme-staging-v02.api.letsencrypt.org
-Cert is due for renewal, auto-renewing...
-Simulating renewal of an existing certificate for *.kozik.net and kozik.net
-Performing the following challenges:
-dns-01 challenge for kozik.net
-dns-01 challenge for kozik.net
-Starting new HTTPS connection (1): api.cloudflare.com
-Starting new HTTPS connection (1): api.cloudflare.com
-Waiting 10 seconds for DNS changes to propagate
-Waiting for verification...
-Cleaning up challenges
-Starting new HTTPS connection (1): api.cloudflare.com
-Starting new HTTPS connection (1): api.cloudflare.com
-
-IMPORTANT NOTES:
- - The dry run was successful.
 [root@dell1 certbot]# certbot certonly --dns-cloudflare --dns-cloudflare-credentials ~/.secrets/certbot/cloudflare.ini -d "*.kozik.net" -d "kozik.net"
 Saving debug log to /var/log/letsencrypt/letsencrypt.log
 Plugins selected: Authenticator dns-cloudflare, Installer None
