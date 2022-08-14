@@ -118,8 +118,9 @@ This prompting of a TXT string and editting it into the DNS record can be done m
 - https://eff-certbot.readthedocs.io/en/stable/using.html#dns-plugins
 - https://certbot-dns-cloudflare.readthedocs.io/en/stable/
 - https://installati.one/centos/7/python2-certbot-dns-cloudflare/
-```
+
 ## Renewing kozik.net 
+```
 [root@dell1 certbot]# certbot certonly --dns-cloudflare --dns-cloudflare-credentials ~/.secrets/certbot/cloudflare.ini -d "*.kozik.net" -d "kozik.net" --dry-run
 Saving debug log to /var/log/letsencrypt/letsencrypt.log
 Plugins selected: Authenticator dns-cloudflare, Installer None
