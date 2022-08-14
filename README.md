@@ -109,6 +109,69 @@ And now, I verify that https://sancapweather.com works and that http://sancapwea
 
 This was easier than I thought.  
 
+# Move to Cloudflare
+With our move to a new a ISP, we had to re-do our certbot approach. Our ISP blocks port 80 and the HTTP-01 challenge for certbot will not work.
+Instead we must use the --preferred-challenge dns option.  With this option, certbot prompts with two different TXT strings to put into the DNS entry for the domain being managed.  The certificate is renewed when the tool verifies that the DNS TXT records are found, thus proving ownership.
+
+This prompting of a TXT string and editting it into the DNS record can be done manually, but with Cloudflare DNS one can install a plugin to certbot that will do this automatically.  As part of doing this, I setup a cloudflare.ini file with a Global API key from my Cloudflare login. 
+## Cloudflare / cerbot renew references
+- https://eff-certbot.readthedocs.io/en/stable/using.html#dns-plugins
+- https://certbot-dns-cloudflare.readthedocs.io/en/stable/
+- https://installati.one/centos/7/python2-certbot-dns-cloudflare/
+```
+## Renewing kozik.net 
+[root@dell1 certbot]# certbot certonly --dns-cloudflare --dns-cloudflare-credentials ~/.secrets/certbot/cloudflare.ini -d "*.kozik.net" -d "kozik.net" --dry-run
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Plugins selected: Authenticator dns-cloudflare, Installer None
+Starting new HTTPS connection (1): acme-staging-v02.api.letsencrypt.org
+Cert is due for renewal, auto-renewing...
+Simulating renewal of an existing certificate for *.kozik.net and kozik.net
+Performing the following challenges:
+dns-01 challenge for kozik.net
+dns-01 challenge for kozik.net
+Starting new HTTPS connection (1): api.cloudflare.com
+Starting new HTTPS connection (1): api.cloudflare.com
+Waiting 10 seconds for DNS changes to propagate
+Waiting for verification...
+Cleaning up challenges
+Starting new HTTPS connection (1): api.cloudflare.com
+Starting new HTTPS connection (1): api.cloudflare.com
+
+IMPORTANT NOTES:
+ - The dry run was successful.
+[root@dell1 certbot]# certbot certonly --dns-cloudflare --dns-cloudflare-credentials ~/.secrets/certbot/cloudflare.ini -d "*.kozik.net" -d "kozik.net"
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Plugins selected: Authenticator dns-cloudflare, Installer None
+Starting new HTTPS connection (1): acme-v02.api.letsencrypt.org
+Cert is due for renewal, auto-renewing...
+Renewing an existing certificate for *.kozik.net and kozik.net
+Performing the following challenges:
+dns-01 challenge for kozik.net
+dns-01 challenge for kozik.net
+Starting new HTTPS connection (1): api.cloudflare.com
+Starting new HTTPS connection (1): api.cloudflare.com
+Waiting 10 seconds for DNS changes to propagate
+Waiting for verification...
+Cleaning up challenges
+Starting new HTTPS connection (1): api.cloudflare.com
+Starting new HTTPS connection (1): api.cloudflare.com
+
+IMPORTANT NOTES:
+ - Congratulations! Your certificate and chain have been saved at:
+   /etc/letsencrypt/live/kozik.net/fullchain.pem
+   Your key file has been saved at:
+   /etc/letsencrypt/live/kozik.net/privkey.pem
+   Your certificate will expire on 2022-11-12. To obtain a new or
+   tweaked version of this certificate in the future, simply run
+   certbot again. To non-interactively renew *all* of your
+   certificates, run "certbot renew"
+ - If you like Certbot, please consider supporting our work by:
+
+   Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+   Donating to EFF:                    https://eff.org/donate-le
+```
+   
+
 # References
 - https://certbot.eff.org/instructions?ws=apache&os=centosrhel7
 - https://linuxhostsupport.com/blog/how-to-install-lets-encrypt-on-centos-7-with-apache/
