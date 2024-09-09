@@ -152,11 +152,86 @@ IMPORTANT NOTES:
    Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
    Donating to EFF:                    https://eff.org/donate-le
 ```
-   
+## Sub-sub Domains
+I want to wild card SSL access to domains https://*.k8s.kozik.net. I have a kubernetes cluster, and I want to grant external access to certain test services.  These test services will everntually get their own dedicated sub domain, eg https://mynewservice.kozik.net, but for quick testing I need to create a sub-sub domain.  
+
+It turns out that the certificate for kozik.net was created with "Domains:  kozik.net, *.kozik.net".  A certificate like that will generate a browswer error and fail the [https://https://www.sslshopper.com/ssl-checker.html] for anything in the sub-subdomain *.k8s.kozik.net.  For example,
+
+![image](https://github.com/user-attachments/assets/89655d29-366b-4102-8d84-1fb23e10000f)
+
+Checking the references on the [Let's Encrypt Community](https://community.letsencrypt.org/), I found a thread [Certificates for sub.subs.domian](https://community.letsencrypt.org/t/certificates-for-sub-subs-domian/107493) that explained that one needs to expand the certificate to enumerate each of the sub-sub domains that need to get wildcarded.  In my case, I needed to add *.k8s.kozik.net to my kozik.net certificate.
+
+Here's the command lines that I ran to do that:
+```
+[root@dell1 certbot]# certbot certonly --dns-cloudflare --dns-cloudflare-credentials ~/.secrets/certbot/cloudflare.ini --dns-cloudflare-propagation-seconds 30 -d "*.kozik.net" -d "kozik.net" -d "*.k8s.kozik.net"
+
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Plugins selected: Authenticator dns-cloudflare, Installer None
+Starting new HTTPS connection (1): acme-v02.api.letsencrypt.org
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+You have an existing certificate that contains a portion of the domains you
+requested (ref: /etc/letsencrypt/renewal/kozik.net.conf)
+
+It contains these names: *.kozik.net, kozik.net
+
+You requested these names for the new certificate: *.kozik.net, kozik.net,
+*.k8s.kozik.net.
+
+Do you want to expand and replace this existing certificate with the new
+certificate?
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+(E)xpand/(C)ancel: E
+Renewing an existing certificate for *.kozik.net and 2 more domains
+Performing the following challenges:
+dns-01 challenge for kozik.net
+dns-01 challenge for kozik.net
+Starting new HTTPS connection (1): api.cloudflare.com
+Starting new HTTPS connection (1): api.cloudflare.com
+Waiting 30 seconds for DNS changes to propagate
+Waiting for verification...
+Cleaning up challenges
+Starting new HTTPS connection (1): api.cloudflare.com
+Starting new HTTPS connection (1): api.cloudflare.com
+
+IMPORTANT NOTES:
+ - Congratulations! Your certificate and chain have been saved at:
+   /etc/letsencrypt/live/kozik.net/fullchain.pem
+   Your key file has been saved at:
+   /etc/letsencrypt/live/kozik.net/privkey.pem
+   Your certificate will expire on 2024-12-08. To obtain a new or
+   tweaked version of this certificate in the future, simply run
+   certbot again. To non-interactively renew *all* of your
+   certificates, run "certbot renew"
+ - If you like Certbot, please consider supporting our work by:
+
+   Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+   Donating to EFF:                    https://eff.org/donate-le
+
+[root@dell1 certbot]#  certbot certificates
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Found the following certs:
+  
+  Certificate Name: kozik.net
+    Serial Number: 34c30d2a91b3e2b08d628e8670ae2d011f4
+    Key Type: RSA
+    Domains: *.kozik.net *.k8s.kozik.net kozik.net
+    Expiry Date: 2024-12-08 15:52:52+00:00 (VALID: 89 days)
+    Certificate Path: /etc/letsencrypt/live/kozik.net/fullchain.pem
+    Private Key Path: /etc/letsencrypt/live/kozik.net/privkey.pem
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+[root@dell1 certbot]#
+```
+A couple of notes:  
+- I am using the cloudflare DNS server and it has [a special module](https://certbot-dns-cloudflare.readthedocs.io/en/stable/) that automates the auto-renewal
+- The command didn't work the first time for me. I had to re-rerun it, inserting a 30 second pause.  
 
 # References
 - https://certbot.eff.org/instructions?ws=apache&os=centosrhel7
 - https://linuxhostsupport.com/blog/how-to-install-lets-encrypt-on-centos-7-with-apache/
 - https://eff-certbot.readthedocs.io/en/stable/using.html#certbot-commands
-- 
+- [Welcome to certbot-dns-cloudflare’s documentation!](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)
 
